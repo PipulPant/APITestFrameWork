@@ -3,8 +3,7 @@
 <suite name="Sample API TestCases">
 
 
-<test name="FleetExpress">
-<parameter name="env" value="https://v2-uat-api.happay.in/" />
+<test name="EmployeeDetails">
 <classes>
 <class name="testSuite.APISampleTest" >
 <methods>
