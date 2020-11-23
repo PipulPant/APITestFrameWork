@@ -1,6 +1,9 @@
 package ServiceAPIs.EmployeeDetails;
 
 
+/**
+ * This is the end point for the API request
+ */
 public class EmployeeDetails_ConfigEP {
 
 

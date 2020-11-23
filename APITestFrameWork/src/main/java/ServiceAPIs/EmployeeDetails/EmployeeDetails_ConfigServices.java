@@ -3,7 +3,7 @@ package ServiceAPIs.EmployeeDetails;
 
 
 
-//Hashmap for the request
+//Hashmap for the API
 public class EmployeeDetails_ConfigServices {
 
 
