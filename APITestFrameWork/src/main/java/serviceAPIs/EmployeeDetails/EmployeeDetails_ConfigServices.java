@@ -1,9 +1,9 @@
-package ServiceAPIs.EmployeeDetails;
+package serviceAPIs.EmployeeDetails;
 
 
 
 
-//Hashmap for the API
+//Hashmap for the request
 public class EmployeeDetails_ConfigServices {
 
 

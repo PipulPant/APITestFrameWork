@@ -1,14 +1,13 @@
 package frameworkBase;
 
 
-import frameworkUtils.Log;
 import io.qameta.allure.Allure;
 import io.restassured.response.ValidatableResponse;
 import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.testng.asserts.SoftAssert;
+import serviceAPIs.EmployeeDetails.EmployeeDetails_ConfigEP;
 
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 
 import static io.restassured.RestAssured.expect;
 
@@ -22,7 +21,6 @@ import static io.restassured.RestAssured.expect;
  */
 
 public class TestBotServiceWrapper extends TestBotBase {
-
     /**
      * This method is used to setup new user session
      *
@@ -31,37 +29,30 @@ public class TestBotServiceWrapper extends TestBotBase {
      * @throws Exception
      */
     public static void setNewUserSession(String baseuri, XSSFRow userRow) throws Exception {
-        HashMap<String, String> loginForm = new HashMap<String, String>();
-        loginForm.put("user", userRow.getCell(1).toString());
-        loginForm.put("password", userRow.getCell(2).toString());
-        System.out.println("login details " + userRow.getCell(1).toString() + userRow.getCell(2).toString() + userRow.getCell(3).toString());
+        HashMap<String, String> loginForm = new HashMap<String, String>();//creating hashmap for the login
+        loginForm.put("user", userRow.getCell(1).toString());//accessing the first cell value
+        loginForm.put("password", userRow.getCell(2).toString());//accessing the second cell value
+        System.out.println("login details " + userRow.getCell(1).toString() + userRow.getCell(2).toString() );//printing the details
 
 
         try {
             TestBotBase.requestSpecification.basePath("");
         } catch (Exception e) {
         }
-        ValidatableResponse login_response;
-        login_response = expect()
+        ValidatableResponse response;
+        response = expect()
                 .given()
                 .when()
-                .get(baseuri)
+                .get(baseuri + EmployeeDetails_ConfigEP.VIEW_EMPLOYEE_GET)//logging to the API
                 .then()
                 .spec(responseSpecification);
 
-        setFM_Bearer_token(login_response.extract().jsonPath().getString("Bearer ID"));//setting the Bearer ID
-        setFM_Token_ID(login_response.extract().jsonPath().getString("TOKEN ID"));//setting the TOKEN_ID
-
-        Log.info("Bearer Token is: "+FM_Bearer_token+"Token ID is: "+FM_Token_ID);
-        getAuthData=new LinkedHashMap<>();//This will be passed in the Header of the API
-        getAuthData.put("Bearer Token",TestBotBase.FM_Bearer_token);//Storing the Bearer Token
-        getAuthData.put("Token ID ",TestBotBase.FM_Token_ID);//Storing the Token ID
 
 
     }
 
     /**
-     * Custom assertion method for string with allure reporting for results
+     * Custom assertion method for string with allure reporting integration for results
      *
      * @param expected    expected string
      * @param actual      actual string from the response
@@ -77,7 +68,7 @@ public class TestBotServiceWrapper extends TestBotBase {
     }
 
     /**
-     * Custom assertion method for boolean with allure reporting for results
+     * Custom assertion method for boolean with allure reporting integration integration for results
      *
      * @param expected    expected boolean(true/false)
      * @param actual      actual boolean from the response
@@ -91,7 +82,6 @@ public class TestBotServiceWrapper extends TestBotBase {
         softAssert.assertEquals(actual, expected, description);
         softAssert.assertAll();
     }
-
 
 
 }

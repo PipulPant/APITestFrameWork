@@ -1,4 +1,4 @@
-package ServiceAPIs.EmployeeDetails;
+package serviceAPIs.EmployeeDetails;
 
 //Getter & Setter Class
 public class EmployeeDetails_Pojo {
