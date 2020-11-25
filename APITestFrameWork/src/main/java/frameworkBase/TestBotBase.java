@@ -1,5 +1,15 @@
 package frameworkBase;
 
+import java.util.Map;
+import java.util.ResourceBundle;
+
+import General.GeneralConfigEP;
+import org.testng.annotations.AfterTest;
+import org.testng.annotations.BeforeTest;
+import org.testng.annotations.Optional;
+import org.testng.annotations.Parameters;
+import org.testng.asserts.SoftAssert;
+
 import frameworkUtils.Log;
 import io.qameta.allure.restassured.AllureRestAssured;
 import io.restassured.builder.RequestSpecBuilder;
@@ -8,12 +18,7 @@ import io.restassured.filter.log.LogDetail;
 import io.restassured.http.ContentType;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
-import org.testng.annotations.AfterTest;
-import org.testng.annotations.BeforeTest;
-import org.testng.asserts.SoftAssert;
-
-import java.util.Map;
-import java.util.ResourceBundle;
+import serviceAPIs.EmployeeDetails.EmployeeDetails_ConfigEP;
 
 
 // TODO: Auto-generated Javadoc
@@ -25,8 +30,8 @@ import java.util.ResourceBundle;
  */
 public class TestBotBase {
 
-    //declaring the global variable
     private static final String CONFIG_FILENAME;
+    private static ResourceBundle resourceBundle;
     public static SoftAssert softAssert;
     public static String environmentBasePath;
     public static RequestSpecification requestSpecification = null;
@@ -34,52 +39,57 @@ public class TestBotBase {
     public static RequestSpecBuilder requestSpecBuilder;
     public static ResponseSpecBuilder responseSpecBuilder;
     public static String statusLine_200, statusLine_400;
-    private static ResourceBundle resourceBundle;
-    public static Map<String, String> getAuthData = null;
-    public static String FM_Bearer_token, FM_Token_ID ;
-
-    /**
-     * @param bearer_token the bearer_token to set
-     */
-    public static void setFM_Bearer_token(String bearer_token) {
-        FM_Bearer_token = bearer_token;
-    }
-
-    /**
-     * @param Token_id the Token_id to set
-     */
-    public static void setFM_Token_ID(String Token_id) {
-        FM_Token_ID = Token_id;
-    }
 
 
 
-    /**
-     * We are loading the value from the config properties using status
-     * so that it can used across the test for assertion
-     */
     static {
 
         CONFIG_FILENAME = "config"; //properties name
         resourceBundle = ResourceBundle.getBundle(CONFIG_FILENAME);//using resource bundle to read the file
+
         softAssert = new SoftAssert();//creating object for SA
         statusLine_200 = getProperty("HTTP_StatusLine_200");//loading statusLine_400 from properties
         statusLine_400 = getProperty("HTTP_StatusLine_400");// loading statusLine_400 from properties
+
+
     }
 
     /**
-     * This method is used for building the response for the API with same parameter
-     * ResponseSpecBuilder helps us for the assertion of various response of the api like status code
-     *
-     * @param baseurl basepath of the API
+     * This method is used to set the environment for testing. Here the env is passed as a parameter.
      */
-    /*public static void setRequestResponseSpec() {
+    //@Parameters({"env"})
+    @BeforeTest
+    public void globalTestSetup() {
+        String env= EmployeeDetails_ConfigEP.CREATE_EMPLOYEE_POST;
+        TestBotBase.environmentBasePath = env;
+        setRequestResponseSpec(env);
+    }
 
-        //need to check this function once
-      }*/
 
     /**
-     * Method to read the property file value.
+     * This method is used to build requestSpecification and responseSpecification which is used in the entire test as header and response respectively
+     * @param baseurl
+     */
+    public static void setRequestResponseSpec(String baseurl) {
+
+        requestSpecBuilder = new RequestSpecBuilder()//creating object of RequestSpecBuilder Class
+                .setBaseUri(baseurl)//setting baseURI
+                .setContentType(ContentType.URLENC)//setting content type
+                .log(LogDetail.ALL);//logging all the request header
+
+        requestSpecification = requestSpecBuilder.build().filter(new AllureRestAssured());//creating allure integration for the
+
+        responseSpecBuilder = new ResponseSpecBuilder()//creating object of ResponseSpecBuilder Class
+                .expectContentType(ContentType.JSON)
+                .log(LogDetail.ALL);//logging all the response of the API
+
+        responseSpecification = responseSpecBuilder.build();//building a response specification for further assertions
+    }
+
+
+
+    /**
+     * Method to read the property value.
      *
      * @param key the key
      * @return the property
@@ -88,27 +98,19 @@ public class TestBotBase {
 
         String propertyValue = null;//setting the initial value to null
 
-        if (resourceBundle != null) {//checking if resource bundle is present
-            propertyValue = resourceBundle.getString(key);//searching for the resource file
+        if (resourceBundle != null) {//checking for the resource file
+            propertyValue = resourceBundle.getString(key);//getting all the valued for the keys
 
 
-            Log.info("Property Value Found: " + propertyValue + " For Key: " + key);//logging the properties value
+            Log.info("Property Value Found: " + propertyValue + " For Key: " + key);//logging the info for property value found
         } else {
-            Log.info("Property File not loaded successfully! ");//if file is not found
+            Log.info("Property File not loaded successfully! ");//property value not found
         }
-        return propertyValue;//returning th property value
+        return propertyValue;//returning the value of the property
     }
 
-    /**
-     * This method is used to set the environment for testing. Here the env is passed as a parameter.
-     * Need some change
-     */
-    //@Parameters({"env"})//this is used to set environment
-    @BeforeTest
-    public void globalTestSetup(String env) {
-        //String env= EmployeeDetails_ConfigEP.CREATE_EMPLOYEE_POST; remove it after completion
-        TestBotBase.environmentBasePath = env;//setting environment variable
-    }
+
+
 
     /**
      * Tear down.
@@ -119,7 +121,7 @@ public class TestBotBase {
     @AfterTest
     public void tearDown() throws Exception {
 
-        //logout after the test execution
+        //logout
     }
 
 }
