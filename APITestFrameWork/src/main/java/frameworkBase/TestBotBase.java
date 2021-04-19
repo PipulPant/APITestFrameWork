@@ -1,15 +1,5 @@
 package frameworkBase;
 
-import java.util.Map;
-import java.util.ResourceBundle;
-
-import General.GeneralConfigEP;
-import org.testng.annotations.AfterTest;
-import org.testng.annotations.BeforeTest;
-import org.testng.annotations.Optional;
-import org.testng.annotations.Parameters;
-import org.testng.asserts.SoftAssert;
-
 import frameworkUtils.Log;
 import io.qameta.allure.restassured.AllureRestAssured;
 import io.restassured.builder.RequestSpecBuilder;
@@ -18,7 +8,11 @@ import io.restassured.filter.log.LogDetail;
 import io.restassured.http.ContentType;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
-import serviceAPIs.EmployeeDetails.EmployeeDetails_ConfigEP;
+import org.testng.annotations.BeforeTest;
+import org.testng.asserts.SoftAssert;
+
+import java.util.Map;
+import java.util.ResourceBundle;
 
 
 // TODO: Auto-generated Javadoc
@@ -38,9 +32,14 @@ public class TestBotBase {
     public static ResponseSpecification responseSpecification;
     public static RequestSpecBuilder requestSpecBuilder;
     public static ResponseSpecBuilder responseSpecBuilder;
-    public static String statusLine_200, statusLine_400;
+    public static String statusCode_200,statusCode_400;
+    public static String username,password;
+    public static Map<String, String> getAuthData = null;
 
+    private static String access_Token;
+    private static String token_id;
 
+    /** The page generator. */
 
     static {
 
@@ -48,11 +47,21 @@ public class TestBotBase {
         resourceBundle = ResourceBundle.getBundle(CONFIG_FILENAME);//using resource bundle to read the file
 
         softAssert = new SoftAssert();//creating object for SA
-        statusLine_200 = getProperty("HTTP_StatusLine_200");//loading statusLine_400 from properties
-        statusLine_400 = getProperty("HTTP_StatusLine_400");// loading statusLine_400 from properties
-
+        statusCode_200 = getProperty("HTTP_StatusCode_200");//loading statusLine_400 from properties
+        statusCode_400 = getProperty("HTTP_StatusCode_400");// loading statusLine_400 from properties
+        username = getProperty("USERNAME");
+        password = getProperty("PASSWORD");
 
     }
+
+    public static String getAccess_Token() { return access_Token; }
+
+    public static String getToken_id() { return token_id; }
+
+    public static void setAccess_Token(String access_Token) { TestBotBase.access_Token = access_Token; }
+
+    public static void setToken_id(String token_id) { TestBotBase.token_id = token_id; }
+
 
     /**
      * This method is used to set the environment for testing. Here the env is passed as a parameter.
@@ -60,7 +69,7 @@ public class TestBotBase {
     //@Parameters({"env"})
     @BeforeTest
     public void globalTestSetup() {
-        String env= EmployeeDetails_ConfigEP.CREATE_EMPLOYEE_POST;
+        String env= "";
         TestBotBase.environmentBasePath = env;
         setRequestResponseSpec(env);
     }
@@ -110,18 +119,16 @@ public class TestBotBase {
     }
 
 
-
-
     /**
      * Tear down.
      *
      * @throws Exception the exception
      */
 
-    @AfterTest
+    /*@AfterTest
     public void tearDown() throws Exception {
 
         //logout
-    }
+    }*/
 
 }

@@ -1,15 +1,18 @@
 package frameworkBase;
 
 
+import frameworkUtils.LocalStorage;
+import frameworkUtils.Log;
 import io.qameta.allure.Allure;
-import io.restassured.response.ValidatableResponse;
-import org.apache.poi.xssf.usermodel.XSSFRow;
+import org.openqa.selenium.By;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.WebDriverWait;
 import org.testng.asserts.SoftAssert;
-import serviceAPIs.EmployeeDetails.EmployeeDetails_ConfigEP;
 
-import java.util.HashMap;
-
-import static io.restassured.RestAssured.expect;
+import java.util.LinkedHashMap;
+import java.util.Random;
 
 
 // TODO: Auto-generated Javadoc
@@ -24,30 +27,51 @@ public class TestBotServiceWrapper extends TestBotBase {
     /**
      * This method is used to setup new user session
      *
-     * @param baseuri is the base uri of the API
-     * @param userRow is the column from where we read the user data
+     * @param //baseURL is the base uri of the API
+     * @param //userRow is the column from where we read the user data
      * @throws Exception
      */
-    public static void setNewUserSession(String baseuri, XSSFRow userRow) throws Exception {
-        HashMap<String, String> loginForm = new HashMap<String, String>();//creating hashmap for the login
-        loginForm.put("user", userRow.getCell(1).toString());//accessing the first cell value
-        loginForm.put("password", userRow.getCell(2).toString());//accessing the second cell value
-        System.out.println("login details " + userRow.getCell(1).toString() + userRow.getCell(2).toString() );//printing the details
+    public static void setNewUserSession(String user, String password) throws Exception {
 
+        //need to change later using method for selectors
 
-        try {
-            TestBotBase.requestSpecification.basePath("");
-        } catch (Exception e) {
-        }
-        ValidatableResponse response;
-        response = expect()
-                .given()
-                .when()
-                .get(baseuri + EmployeeDetails_ConfigEP.VIEW_EMPLOYEE_GET)//logging to the API
-                .then()
-                .spec(responseSpecification);
+        WebDriver driver = TestBotDrivers.setChromeDriver();
 
+        //driver.get(url)
+        driver.get("http://auto-stage.admin.fuseclassroom.com/");
 
+        WebDriverWait wait = new WebDriverWait(driver, 15); //you can play with the time integer  to wait for longer than 15 seconds.`
+        wait.until(ExpectedConditions.titleContains("Signin")); //if you want to wait for a particular title to show up
+
+        //accessing the username,password and sending keys
+        WebElement username_CSS = driver.findElement(By.cssSelector(".background-customizable.modal-content.modal-content-mobile.visible-lg.visible-md > .modal-body form[name='cognitoSignInForm']  input#signInFormUsername"));
+        WebElement Password_CSS = driver.findElement(By.cssSelector(".background-customizable.modal-content.modal-content-mobile.visible-lg.visible-md > .modal-body form[name='cognitoSignInForm']  input#signInFormPassword"));
+        WebElement login_CSS = driver.findElement(By.cssSelector(".background-customizable.modal-content.modal-content-mobile.visible-lg.visible-md > .modal-body form[name='cognitoSignInForm'] > input[name='signInSubmitButton']"));
+
+        username_CSS.sendKeys(user);//username
+        Password_CSS.sendKeys(password);//password
+
+        login_CSS.click();//login to fuse machines portal
+
+        Thread.sleep(10000);//waiting for 10s for cookies to read
+
+        //accessing local storage method
+        LocalStorage localStorage = new LocalStorage(driver);
+        String access_token = localStorage.getItemFromLocalStorage("access_token");//accessing the access token
+        String idToken = localStorage.getItemFromLocalStorage("id_token");//accessing the token id
+
+        //Setting Access Token and Token Id in the POJO Class
+        TestBotBase.setAccess_Token(access_token);
+        TestBotBase.setToken_id(idToken);
+
+        //Logging the header information
+        Log.info("Bearer Token is:" + access_token + "  Token ID is: " + idToken);
+        getAuthData = new LinkedHashMap<>();
+        getAuthData.put("Authorization", "bearer " + TestBotBase.getAccess_Token());
+        getAuthData.put("idToken", TestBotBase.getToken_id());
+        getAuthData.put("Origin", "https://auto-stage.admin.fuseclassroom.com");
+        getAuthData.put("Host", "app-api-stage.fuseclassroom.com");
+        getAuthData.put("Content-Type", "application/json");
 
     }
 
@@ -81,6 +105,36 @@ public class TestBotServiceWrapper extends TestBotBase {
         Allure.step(" Actual output :" + actual);
         softAssert.assertEquals(actual, expected, description);
         softAssert.assertAll();
+    }
+
+    public static String random_Text() {
+        // create a string of all characters
+        String alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+
+        // create random string builder
+        StringBuilder sb = new StringBuilder();
+
+        // create an object of Random class
+        Random random = new Random();
+
+        // specify length of random string
+        int length = 7;
+
+        for (int i = 0; i < length; i++) {
+
+            // generate random index number
+            int index = random.nextInt(alphabet.length());
+
+            // get character specified by index
+            // from the string
+            char randomChar = alphabet.charAt(index);
+
+            // append the character to string builder
+            sb.append(randomChar);
+        }
+
+        String randomString = sb.toString();
+        return randomString;
     }
 
 
